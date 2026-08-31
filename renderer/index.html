@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+<title>Sanitizer</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="shell">
+
+  <!-- ---- Rail ---- -->
+  <div class="rail">
+    <div class="brand">
+      <svg src="../renderer/icon.png class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M4 4h16v6c0 6-4 9-8 10-4-1-8-4-8-10V4z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+      <div>
+        <div class="brand-name">Sanitizer</div>
+        <div class="brand-sub">entry point firewall</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn active" data-view="rules">Rules</button>
+      <button class="nav-btn" data-view="test">Live Test</button>
+      <button class="nav-btn" data-view="scan">Scanner</button>
+      <button class="nav-btn" data-view="export">Export</button>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Profiles</div>
+      <div class="profile-list" id="profileList"></div>
+      <button class="ghost-btn full" id="newProfileBtn">+ New profile</button>
+    </div>
+
+    <div class="rail-footer">
+      <span class="save-state" id="saveState">saved</span>
+    </div>
+  </div>
+
+  <!-- ---- Content ---- -->
+  <div class="content">
+
+    <!-- Rules view -->
+    <div class="view active" id="view-rules">
+      <div class="view-head">
+        <div>
+          <input class="profile-name-input" id="profileName" placeholder="Profile name" />
+          <input class="profile-desc-input" id="profileDesc" placeholder="Description" />
+        </div>
+        <div class="view-head-actions">
+          <button class="ghost-btn" id="duplicateProfileBtn">Duplicate</button>
+          <button class="ghost-btn danger" id="deleteProfileBtn">Delete</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Banned character categories</h3>
+          <p class="hint">Toggle a group off to allow it (e.g. turn off Dash / Underscore for usernames).</p>
+          <div class="category-list" id="categoryList"></div>
+        </div>
+
+        <div class="card">
+          <h3>Custom characters</h3>
+          <p class="hint">Extra characters to ban or explicitly allow, on top of the categories.</p>
+          <label class="field-label">Custom banned characters</label>
+          <input class="text-input mono" id="customBanned" placeholder="e.g. ~ ^ |" />
+          <label class="field-label">Custom allowed characters (overrides categories above)</label>
+          <input class="text-input mono" id="customAllowed" placeholder="e.g. @ . -" />
+
+          <label class="field-label">Numeric rules</label>
+          <label class="switch-row">
+            <span>Block input that is only digits</span>
+            <input type="checkbox" id="blockPureNumeric" />
+          </label>
+          <label class="switch-row">
+            <span>Block long numeric sequences</span>
+            <input type="checkbox" id="blockNumericSeq" />
+          </label>
+          <label class="switch-row inline" style="margin-top:8px;">
+            <span class="field-label inline">Max consecutive digits allowed</span>
+            <input class="text-input narrow" type="number" min="0" id="maxNumericLen" />
+          </label>
+        </div>
+
+        <div class="card">
+          <h3>Allowed file extensions</h3>
+          <p class="hint">Files outside this list are rejected regardless of content.</p>
+          <div class="chip-row" id="extChips"></div>
+          <div class="chip-add-row">
+            <input class="text-input mono" id="extInput" placeholder=".png" />
+            <button class="ghost-btn" id="addExtBtn">Add</button>
+          </div>
+          <label class="switch-row inline">
+            <span class="field-label inline">Case-sensitive extension match</span>
+            <input type="checkbox" id="caseSensitiveExt" />
+          </label>
+        </div>
+
+        <div class="card">
+          <h3>File size limit</h3>
+          <p class="hint">Maximum accepted upload size for this profile.</p>
+          <label class="field-label">Max file size (MB)</label>
+          <input class="text-input narrow" type="number" min="0" step="0.5" id="maxFileSize" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Test view -->
+    <div class="view" id="view-test">
+      <div class="view-head">
+        <h2>Live test</h2>
+      </div>
+
+      <div class="grid two-col">
+        <div class="card">
+          <h3>Text field</h3>
+          <label class="field-label">Profile</label>
+          <select class="text-input" id="testProfileSelect"></select>
+          <label class="field-label">Test input</label>
+          <textarea class="text-input" id="testTextInput" rows="4" placeholder="Type something to validate..."></textarea>
+          <div class="result-box idle" id="testTextResult">Waiting for input</div>
+        </div>
+
+        <div class="card">
+          <h3>File field</h3>
+          <p class="hint">Uses the same profile selected on the left.</p>
+          <button class="ghost-btn" id="chooseTestFileBtn">Choose a file to test</button>
+          <p class="hint inline" id="testFileName" style="margin-top:8px;"></p>
+          <div class="result-box idle" id="testFileResult">No file selected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner view -->
+    <div class="view" id="view-scan">
+      <div class="view-head">
+        <h2>Project scanner</h2>
+      </div>
+
+      <div class="card">
+        <div class="scan-toolbar">
+          <button class="ghost-btn" id="chooseFolderBtn">Choose project folder</button>
+          <span class="hint inline" id="scanFolderPath">No folder selected</span>
+          <label class="field-label inline">Wire new fields with</label>
+          <select class="text-input narrow" id="scanProfileSelect"></select>
+          <button class="primary-btn" id="runScanBtn" disabled>Run scan</button>
+        </div>
+
+        <p class="hint" id="scanSummary">Choose a folder and run a scan to find entry points.</p>
+
+        <div class="table-wrap">
+          <table class="findings-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Type</th>
+                <th>File</th>
+                <th>Line</th>
+                <th>Snippet</th>
+              </tr>
+            </thead>
+            <tbody id="findingsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="scan-footer">
+          <button class="primary-btn" id="applyFindingsBtn" disabled>Apply checked fixes</button>
+          <span class="hint inline" id="applyResult"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export view -->
+    <div class="view" id="view-export">
+      <div class="view-head">
+        <h2>Export standalone bundle</h2>
+      </div>
+
+      <div class="card narrow-card">
+        <h3>Drop-in files for other projects</h3>
+        <p class="hint">
+          Writes sanitizer-core.js, sanitizer-runtime.js, and sanitizer-profiles.js
+          (your current profiles) to a folder of your choice. Include all three
+          script tags, in that order, and add data-sanitize-profile="Profile Name"
+          to any input, textarea, or file field.
+        </p>
+        <button class="primary-btn full" id="exportBtn">Choose folder & export</button>
+        <p class="hint inline" id="exportResult" style="margin-top:10px;"></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="sanitizer-core.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

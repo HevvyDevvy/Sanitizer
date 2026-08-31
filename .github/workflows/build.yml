@@ -1,0 +1,53 @@
+name: Build Sanitizer App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # electron-builder's bundled signtool.exe can't sign .appx packages
+      # ("A required function is not present"). Point it at the real
+      # Windows SDK signtool.exe instead, via SIGNTOOL_PATH, which
+      # build-resources/customSign.cjs picks up.
+      - name: Locate real signtool.exe
+        shell: pwsh
+        run: |
+          $tool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $tool) { throw "signtool.exe not found under Windows Kits" }
+          echo "SIGNTOOL_PATH=$($tool.FullName)" >> $env:GITHUB_ENV
+
+      - name: Package Desktop Installer (.appx + .exe)
+        run: npx electron-builder --win appx nsis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Upload Installer Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sanitizer-Windows-Installer
+          path: |
+            release/*.appx
+            release/*.exe
+          if-no-files-found: error
