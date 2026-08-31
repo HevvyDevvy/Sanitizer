@@ -32,14 +32,15 @@
       "output": "release",
       "buildResources": "build-resources"
     },
-     "win": {
-     "target": [
-    { "target": "appx", "arch": ["x64"] },
-    { "target": "nsis", "arch": ["x64"] },
+    "win": {
+      "target": [
+        { "target": "appx", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ],
       "icon": "assets/icon.ico",
       "sign": "./build-resources/customSign.cjs",
       "signingHashAlgorithms": ["sha256"]
-   },
+    },
     "appx": {
       "applicationId": "Sanitiz3r",
       "identityName": "TMHP.com.Sanitiz3r",
