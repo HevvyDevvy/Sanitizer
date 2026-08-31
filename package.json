@@ -39,7 +39,7 @@
       "icon": "assets/icon.ico",
       "sign": "./build-resources/customSign.cjs",
       "signingHashAlgorithms": ["sha256"]
-     },
+   },
     "appx": {
       "applicationId": "Sanitiz3r",
       "identityName": "TMHP.com.Sanitiz3r",
