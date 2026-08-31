@@ -43,6 +43,21 @@ jobs:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
 
+      # Only runs if the step above fails. Prints the manifest makeappx
+      # actually tried to package, so the exact validation error can be
+      # diagnosed instead of guessed at.
+      - name: Dump generated AppxManifest.xml on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          $manifest = Get-ChildItem -Path release -Recurse -Filter AppxManifest.xml -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($manifest) {
+            Write-Host "Found manifest at: $($manifest.FullName)"
+            Get-Content $manifest.FullName -Raw
+          } else {
+            Write-Host "No AppxManifest.xml found under release\"
+          }
+
       - name: Upload Installer Artifacts
         uses: actions/upload-artifact@v4
         with:
