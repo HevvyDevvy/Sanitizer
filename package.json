@@ -40,12 +40,9 @@
      "icon": "assets/icon.ico",
      "sign": "./build-resources/customSign.cjs"
      },
-    
-    },
     "appx": {
       "applicationId": "Sanitiz3r",
       "identityName": "TMHP.com.Sanitiz3r",
-      "publisher": "BB6CF6A1-F89B-484C-85F4-1A7E35694B74",
       "publisherDisplayName": "@TMHP.com",
       "backgroundColor": "#0a0d12",
       "showNameOnTiles": true,
@@ -58,3 +55,4 @@
       "createStartMenuShortcut": true
     }
   }
+}
