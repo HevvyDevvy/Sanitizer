@@ -2,7 +2,7 @@
   "name": "Sanitiz3r",
   "productName": "Sanitiz3r",
   "version": "1.0.0",
-  "description": "Configurable input & file entry-point sanitizer with project scanner. Blocks XSS, SQLi, SSTI, and command-injection payloads at every text and upload field.",
+  "description": "Configurable input and file entry-point sanitizer with project scanner. Blocks XSS, SQLi, SSTI, and command-injection payloads at every text and upload field.",
   "author": "Blu Corbel",
   "license": "MIT",
   "main": "main.js",
